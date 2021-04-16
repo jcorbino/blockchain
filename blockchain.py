@@ -40,7 +40,7 @@ class Blockchain:
                            md5((''.zfill(32)+'Genesis'+str(nonce)).encode('utf-8')).hexdigest()))
 
     def add_block(self, content = ''):
-        nonce = 0;
+        nonce = 0
         prev_hash = self.blocks[-1].hash
 
         hash = md5((prev_hash+content+str(nonce)).encode('utf-8')).hexdigest()
