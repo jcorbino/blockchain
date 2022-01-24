@@ -15,14 +15,14 @@ class Block:
     prev_hash = ''
     content = ''
     nonce = 0
-    hash = ''
+    md5_hash = ''
 
-    def __init__(self, timestamp, prev_hash, content, nonce, hash):
+    def __init__(self, timestamp, prev_hash, content, nonce, md5_hash):
         self.timestamp = timestamp
         self.prev_hash = prev_hash
         self.content = content
         self.nonce = nonce
-        self.hash = hash
+        self.md5_hash = md5_hash
 
     def serialize(self):
         return self.prev_hash+self.content+str(self.nonce)
@@ -41,38 +41,37 @@ class Blockchain:
 
     def add_block(self, content = ''):
         nonce = 0
-        prev_hash = self.blocks[-1].hash
+        prev_hash = self.blocks[-1].md5_hash
 
-        hash = md5((prev_hash+content+str(nonce)).encode('utf-8')).hexdigest()
+        md5_hash = md5((prev_hash+content+str(nonce)).encode('utf-8')).hexdigest()
 
         # Mining:
-        while hash[0:len(self.prefix)] != self.prefix and nonce < self.MAX_NONCE:
+        while md5_hash[0:len(self.prefix)] != self.prefix and nonce < self.MAX_NONCE:
             nonce += 1
-            hash = md5((prev_hash+content+str(nonce)).encode('utf-8')).hexdigest()
-        
+            md5_hash = md5((prev_hash+content+str(nonce)).encode('utf-8')).hexdigest()
+
         if nonce < self.MAX_NONCE:
-            self.blocks.append(Block(datetime.now(), prev_hash, content, nonce,
-                               hash))
+            self.blocks.append(Block(datetime.now(), prev_hash, content, nonce, md5_hash))
         else:
             print('Unable to mine block #'+str(len(self.blocks)+1))
 
     def print_chain(self):
         i = 1
         for block in self.blocks:
-            print('BLOCK #%d =======================' % i); i += 1
+            print(f'BLOCK #{i} ======================='); i += 1
             print(block.prev_hash)
             print(block.timestamp)
             print(block.content)
-            print(block.hash)
+            print(block.md5_hash)
             print('================================\n\t\t|\n\t\tV')
 
     def check_block(self, block_num):
         if block_num > 0:
             block = self.blocks[block_num-1]
-            if md5((block.serialize()).encode('utf-8')).hexdigest() == block.hash:
-                print('Block #%d is valid' % block_num)
+            if md5((block.serialize()).encode('utf-8')).hexdigest() == block.md5_hash:
+                print(f'Block #{block_num} is valid')
             else:
-                print('Block #%d is invalid' % block_num)
+                print(f'Block #{block_num} is invalid')
         else:
             print('Invalid block number')
 
@@ -89,5 +88,5 @@ b.add_block('Noelle')
 t2 = time()
 
 b.print_chain()
-print('Elapsed time: %.2fs' % (t2-t1))
+print(f'Elapsed time: {t2-t1:.2f}s')
 b.check_chain()
